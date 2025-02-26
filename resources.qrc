@@ -1,0 +1,16 @@
+<!DOCTYPE RCC><RCC version="1.0">
+    <qresource prefix="/map">
+        <file alias="grass">src/sprites/map/grass.png</file>
+    </qresource>
+    <qresource prefix="/moods">
+        <file alias="sprAnnoyed">src/sprites/moods/mood-annoyed.gif</file>
+        <file alias="sprLove">src/sprites/moods/mood-love.gif</file>
+        <file alias="sprSad">src/sprites/moods/mood-sad.gif</file>
+    </qresource>
+    <qresource prefix="/player">
+        <file alias="sprDown">src/sprites/player/Pinny_D-DOWN.png</file>
+        <file alias="sprLeft">src/sprites/player/Pinny_D-LEFT.png</file>
+        <file alias="sprRight">src/sprites/player/Pinny_D-RIGHT.png</file>
+        <file alias="sprUp">src/sprites/player/Pinny_D-UP.png</file>
+    </qresource>
+</RCC>
