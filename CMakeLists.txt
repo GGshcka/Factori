@@ -10,6 +10,7 @@ find_package(Qt6 COMPONENTS
         Core
         Gui
         Widgets
+        OpenGLWidgets
         REQUIRED)
 find_package(Python3 COMPONENTS Development REQUIRED)
 qt_standard_project_setup()
@@ -17,7 +18,9 @@ qt_standard_project_setup()
 file(GLOB FILES
         "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/*.h"
-        "${CMAKE_CURRENT_SOURCE_DIR}/**/*.h"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/modules/*.h"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/modules/*.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/windows/*.h"
         "${CMAKE_CURRENT_SOURCE_DIR}/*.qrc"
 )
 
@@ -31,6 +34,7 @@ target_link_libraries(${PROJECT_NAME}
         PRIVATE Qt::Core
         PRIVATE Qt::Gui
         PRIVATE Qt::Widgets
+        PRIVATE Qt::OpenGLWidgets
         PRIVATE ${Python3_LIBRARIES}
 )
 

@@ -1,21 +1,17 @@
-//
-// Created by silly on 25.02.2025.
-//
-
 #ifndef FACTORI_MAINWINDOW_H
 #define FACTORI_MAINWINDOW_H
 
 #include <Qt>
-#include <QtGlobal>
 #include <QtWidgets>
-#include "src/player.h"
-#include "src/gamescene.h"
+#include <QtGlobal>
+#include "OpenGLScene.h"
+#include "GLMDI.h"
 
 class MainWindow : public QMainWindow {
 Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = nullptr) : QMainWindow(parent) {
+    MainWindow(QWidget *parent = nullptr) : QMainWindow(parent) {
         setWindowTitle("Factori");
 
         QMenuBar *menuBar = this->menuBar();
@@ -34,34 +30,15 @@ public:
 
         menuBar->addMenu(systemMenuItem);
 
-        mdiArea = new QMdiArea(this);
+        /*mdiArea = new QMdiArea(this);
         mdiArea->setGeometry(0, 0, this->width(), this->height());
 
-        graphicsView = new QGraphicsView(mdiArea);
+        glView = new OpenGLScene();
+        glView->setAutoFillBackground(true);
 
-        mdiArea->setViewport(graphicsView);
+        mdiArea->setViewport(glView);*/
 
-        test = new QMdiSubWindow();
-        test->setWindowTitle(QString("test"));
-        test->setGeometry(width() - 200 - 20, 40, 200, 500);
-
-        mdiArea->addSubWindow(test);
-
-        /*scene = new QGraphicsScene();
-        scene->setSceneRect(0, 0, this->width(), this->height());
-        scene->setBackgroundBrush(QBrush(Qt::lightGray));
-
-        plr = new Player(QPixmap(":/player/sprDown"));
-        scene->addItem(plr);*/
-
-        scene = new GameScene();
-
-        graphicsView->setScene(scene);
-        graphicsView->setRenderHint(QPainter::Antialiasing);
-        graphicsView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-        graphicsView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-
-        moodMenuItem = menuBar->addMenu("Moods");
+        /*moodMenuItem = menuBar->addMenu("Moods");
 
         auto *moodLoveMenuAction = new QAction("Love", this);
         connect(moodLoveMenuAction, &QAction::triggered, this, [this]() {
@@ -81,15 +58,17 @@ public:
         });
         moodMenuItem->addAction(moodAnnoyedMenuAction);
 
-        menuBar->addMenu(moodMenuItem);
+        menuBar->addMenu(moodMenuItem);*/
 
-        setCentralWidget(mdiArea);
+        mainView = new GLMDI();
+
+        setCentralWidget(mainView);
     }
 
 protected:
     void keyPressEvent(QKeyEvent *event) override {
         switch (event->key()) {
-            case Qt::Key_Plus:
+            /*case Qt::Key_Plus:
             case Qt::Key_Equal:
                 graphicsView->scale(1.2, 1.2);
                 break;
@@ -115,28 +94,22 @@ protected:
             case 1042:
                 scene->cuteCatGirl->setX(scene->cuteCatGirl->x()+(scene->cuteCatGirl->pixmap().width()/10.0));
                 scene->cuteCatGirl->setPixmap(QPixmap(":/player/sprRight"));
-                break;
+                break;*/
             case Qt::Key_F1:
                 menuBar()->setActiveAction(menuBar()->actions()[0]);
                 break;
-            case Qt::Key_F2:
+            /*case Qt::Key_F2:
                 menuBar()->setActiveAction(menuBar()->actions()[1]);
-                break;
+                break;*/
         }
-        //qDebug() << "INFO: KeyPressed:" << char (event->key()) << "|" << event->key();
-        graphicsView->centerOn(scene->cuteCatGirl);
-        graphicsView->update();
         QWidget::keyPressEvent(event);
     }
 
     void resizeEvent(QResizeEvent *event) override {
         QMainWindow::resizeEvent(event);
-        /*mdiArea->update();
-        graphicsView->setGeometry(mdiArea->viewport()->rect());
-        graphicsView->update();
-        scene->update();*/
-        mdiArea->setViewport(graphicsView);
-        test->setGeometry(width() - 200 - 20, 40, 200, 500);
+        mainView->setFixedSize(this->width(), this->height() - menuBar()->height());
+        mainView->update();
+//        test->setGeometry(width() - 200, 0, 200, mdiArea->height());
     }
 
 
@@ -145,8 +118,9 @@ private:
     QMdiSubWindow *test;
     QMenu *systemMenuItem, *moodMenuItem;
     QGraphicsView *graphicsView;
-    /*QGraphicsScene*/GameScene *scene;
-    Player *plr;
+    GLMDI *mainView;
+    /*QGraphicsScene*//*GameScene *scene;
+    Player *plr;*/
 };
 
 
