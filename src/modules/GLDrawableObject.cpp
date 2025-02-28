@@ -23,6 +23,9 @@ void GLDrawableObject::setSize(float w, float h) {
     width = w;
     height = h;
 }
+QVector2D GLDrawableObject::getSize() const {
+    return {width, height};
+}
 
 void GLDrawableObject::setRotation(float angle) {
     rotation = angle;

@@ -1,6 +1,11 @@
 <!DOCTYPE RCC><RCC version="1.0">
+    <qresource prefix="/">
+        <file alias="style">src/style.scss</file>
+    </qresource>
     <qresource prefix="/map">
         <file alias="grass">src/sprites/map/grass.png</file>
+        <file alias="sand">src/sprites/map/sand.png</file>
+        <file alias="water">src/sprites/map/water.png</file>
     </qresource>
     <qresource prefix="/moods">
         <file alias="sprAnnoyed">src/sprites/moods/mood-annoyed.gif</file>

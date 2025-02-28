@@ -11,9 +11,12 @@ find_package(Qt6 COMPONENTS
         Gui
         Widgets
         OpenGLWidgets
+        Concurrent
         REQUIRED)
 find_package(Python3 COMPONENTS Development REQUIRED)
 qt_standard_project_setup()
+
+include_directories(${Python3_INCLUDE_DIRS})
 
 file(GLOB FILES
         "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp"
@@ -35,6 +38,7 @@ target_link_libraries(${PROJECT_NAME}
         PRIVATE Qt::Gui
         PRIVATE Qt::Widgets
         PRIVATE Qt::OpenGLWidgets
+        PRIVATE Qt::Concurrent
         PRIVATE ${Python3_LIBRARIES}
 )
 

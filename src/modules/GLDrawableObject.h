@@ -17,6 +17,8 @@ public:
     QVector2D getPosition() const;
 
     void setSize(float w, float h);
+    QVector2D getSize() const;
+
     void setRotation(float angle);
     void rotate(float angle);
     void setOpacity(float alpha);
