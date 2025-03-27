@@ -5,6 +5,9 @@
 #include <QtWidgets>
 #include <QtGlobal>
 #include <QOpenGLWidget>
+#include <QOpenGLFunctions_3_3_Core>
+#include <QOpenGLBuffer>
+#include <QOpenGLVertexArrayObject>
 #include "GLDrawableObject.h"
 
 class OpenGLScene : public QOpenGLWidget, protected QOpenGLFunctions {
@@ -16,8 +19,12 @@ public:
         movementTimer = new QTimer(this);
         connect(movementTimer, &QTimer::timeout, this, &OpenGLScene::updateMovement);
         movementTimer->start(1000/60);
+        setMouseTracking(true);
     }
+    ~OpenGLScene();
+
     GLDrawableObject *player;
+    static bool editMode;
 
     void zoom(double value);
 
@@ -28,9 +35,12 @@ protected:
 
     void keyPressEvent(QKeyEvent *event) override;
     void keyReleaseEvent(QKeyEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
 
 private:
     QVector<GLDrawableObject*> chunks;
+    QVector<QPair<int, int>>* placedObjects;
     double zoomValue;
     int width, height;
     QSet<int> keysPressed;
@@ -38,10 +48,13 @@ private:
     int seed;
     int chunkSize = 2;
     QVector2D currentChunk;
-    QVector2D lastChunk;
+    const float cellSize = 1.0f;
+    QPointF mousePos, mouseWorldPos, mouseGridPos;
 
     void updateMovement();
     void chunkLoader();
+    void drawGrid();
+    void drawPlacedObjects();
 };
 
 

@@ -3,9 +3,7 @@
         <file alias="style">src/style.scss</file>
     </qresource>
     <qresource prefix="/map">
-        <file alias="grass">src/sprites/map/grass.png</file>
-        <file alias="sand">src/sprites/map/sand.png</file>
-        <file alias="water">src/sprites/map/water.png</file>
+        <file alias="atlas">src/sprites/map/textureAtlas.png</file>
     </qresource>
     <qresource prefix="/moods">
         <file alias="sprAnnoyed">src/sprites/moods/mood-annoyed.gif</file>
@@ -17,5 +15,12 @@
         <file alias="sprLeft">src/sprites/player/Pinny_D-LEFT.png</file>
         <file alias="sprRight">src/sprites/player/Pinny_D-RIGHT.png</file>
         <file alias="sprUp">src/sprites/player/Pinny_D-UP.png</file>
+        <file alias="sprPlr">src/sprites/player/player.png</file>
+    </qresource>
+    <qresource prefix="/obj">
+        <file alias="sprTest">src/sprites/objects/testObj.png</file>
+    </qresource>
+    <qresource prefix="/ui">
+        <file alias="sprCloseIcon">src/sprites/ui/uiClose.png</file>
     </qresource>
 </RCC>

@@ -1,6 +1,9 @@
 #include "OpenGLScene.h"
 #include "PerlinNoiseGenerator.h"
 #include "GLMDI.h"
+#include "DebugInfoHandler.h"
+
+bool OpenGLScene::editMode = false;
 
 void OpenGLScene::initializeGL() {
     initializeOpenGLFunctions();
@@ -17,14 +20,10 @@ void OpenGLScene::initializeGL() {
     player->appendTextureBuffer(new QOpenGLTexture(QImage(":/player/sprLeft").mirrored()));
     player->appendTextureBuffer(new QOpenGLTexture(QImage(":/player/sprRight").mirrored()));
 
-    /*auto* generator = new PerlinNoiseGenerator(0, 0, 50, 50, *//*QDateTime::currentMSecsSinceEpoch() / 1000*//*69);
-    QOpenGLTexture* texture = generator->generateTexture();
-    mapObj = new GLDrawableObject(texture);
-
-    mapObj->setSize(texture->width() / (32 * 2), texture->height() / (32 * 2));*/
+    placedObjects = new QVector<QPair<int, int>>();
 
     chunkLoader();
-}   //new QOpenGLTexture(QImage(":/map/grass").mirrored())
+}
 
 void OpenGLScene::paintGL() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -42,19 +41,13 @@ void OpenGLScene::paintGL() {
 
     glTranslatef(-player->getPosition().x(), -player->getPosition().y(), 0.0f);
 
-    //mapObj->draw();
-
     for (GLDrawableObject* chunk : chunks) {
         chunk->draw();
     }
 
+    drawPlacedObjects();
+    if (editMode) drawGrid();
     player->draw();
-
-    /*QVector2D pos = player->getPosition();
-    QVector2D size = mapObj->getSize();
-    QString debugText = QString(
-            "Map INFO | W: %1 | H: %2"
-            "\nPlayer POS | X: %3 | Y: %4").arg(size.x()).arg(size.y()).arg(pos.x()).arg(pos.y());*/
 }
 
 void OpenGLScene::resizeGL(int w, int h) {
@@ -65,8 +58,9 @@ void OpenGLScene::resizeGL(int w, int h) {
 
 void OpenGLScene::zoom(double value) {
     zoomValue += value;
-    zoomValue = std::clamp(zoomValue, 0.5, 10.0);
+    zoomValue = std::clamp(zoomValue, 1.0, 15.0);
     update();
+    chunkLoader();
 }
 
 void OpenGLScene::keyPressEvent(QKeyEvent *event) {
@@ -141,10 +135,10 @@ void OpenGLScene::chunkLoader() {
     int zoomMultiplier = static_cast<int>(std::trunc(zoomValue));
 
     // Границы области рендеринга чанков
-    int minX = currentChunk.x() - (4 * zoomMultiplier);
-    int maxX = currentChunk.x() + (4 * zoomMultiplier);
-    int minY = currentChunk.y() - (4 * zoomMultiplier);
-    int maxY = currentChunk.y() + (4 * zoomMultiplier);
+    int minX = currentChunk.x() - (3 * zoomMultiplier) - 1;
+    int maxX = currentChunk.x() + (3 * zoomMultiplier) + 1;
+    int minY = currentChunk.y() - (2 * zoomMultiplier) - 1;
+    int maxY = currentChunk.y() + (2 * zoomMultiplier) + 1;
 
     // Создаем временный контейнер для новых чанков
     QHash<QPair<int, int>, GLDrawableObject*> updatedChunks;
@@ -167,14 +161,15 @@ void OpenGLScene::chunkLoader() {
     }
 
     // Создаем недостающие чанки
-    for (int i = -4 * zoomMultiplier; i <= 4 * zoomMultiplier; i++) {
-        for (int j = -4 * zoomMultiplier; j <= 4 * zoomMultiplier; j++) {
+    for (int i = -3 * zoomMultiplier; i <= 3 * zoomMultiplier; i++) {
+        for (int j = -2 * zoomMultiplier; j <= 2 * zoomMultiplier; j++) {
             int chunkX = currentChunk.x() + i;
             int chunkY = currentChunk.y() + j;
             QPair<int, int> chunkCoords(chunkX, chunkY);
 
             if (!updatedChunks.contains(chunkCoords)) {
                 auto* generator = new PerlinNoiseGenerator(chunkX, chunkY, chunkSize, chunkSize, seed);
+
                 QOpenGLTexture* texture = generator->generateTexture();
                 auto* chunk = new GLDrawableObject(texture);
 
@@ -195,4 +190,90 @@ void OpenGLScene::chunkLoader() {
     // Обновляем основной контейнер чанков
     chunks = updatedChunks.values();
 }
+
+void OpenGLScene::drawPlacedObjects() {
+    glColor3f(1.0f, 0.0f, 0.0f);
+    glBegin(GL_QUADS);
+
+    for (const auto &pos : *placedObjects) {
+        auto *obj = new GLDrawableObject(new QOpenGLTexture(QImage(":/obj/sprTest").mirrored()));
+        obj->setPosition(pos.first, pos.second);
+        obj->draw();
+    }
+
+    glEnd();
+}
+
+OpenGLScene::~OpenGLScene() {
+    chunks.clear();
+    delete player;
+}
+
+//TODO Первый объект белый
+void OpenGLScene::mousePressEvent(QMouseEvent *event) {
+    if (editMode) {
+        auto find = std::find(placedObjects->begin(), placedObjects->end(), qMakePair(mouseGridPos.x(), mouseGridPos.y()));
+        if (find == placedObjects->end()) {
+            placedObjects->append(qMakePair(mouseGridPos.x(), mouseGridPos.y()));
+            qDebug() << "Appended:" << mouseGridPos.x() << "|" << mouseGridPos.y();
+        }
+
+        update();
+    }
+}
+
+void OpenGLScene::drawGrid() {
+    glColor3f(1.0f, 1.0f, 1.0f); // Серый цвет сетки
+    glLineWidth(1.0f);
+    glBegin(GL_LINES);
+
+    float startX = std::round(player->getPosition().x()) - width / 2 - cellSize / 2;
+    float endX = startX + width;
+    float startY = std::round(player->getPosition().y()) - height / 2 - cellSize / 2;
+    float endY = startY + height;
+
+    // Вертикальные линии
+    for (float x = startX; x <= endX; x += cellSize) {
+        glVertex2f(x, startY);
+        glVertex2f(x, endY);
+    }
+
+    // Горизонтальные линии
+    for (float y = startY; y <= endY; y += cellSize) {
+        glVertex2f(startX, y);
+        glVertex2f(endX, y);
+    }
+
+    glEnd();
+
+    glColor4f(1.0f, 0.0f, 0.0f, 0.5f); // Красный цвет квадрата
+    glBegin(GL_QUADS);
+
+    float aspect = float(width) / float(height);
+    mouseWorldPos.setX(((2.0f * mousePos.x()) / width - 1.0f) * zoomValue * aspect + player->getPosition().x());
+    mouseWorldPos.setY((1.0f - 2.0f * mousePos.y() / height) * zoomValue + player->getPosition().y());
+
+    // Привязка к сетке
+    mouseGridPos.setX(std::round(mouseWorldPos.x() / cellSize) * cellSize);
+    mouseGridPos.setY(std::round(mouseWorldPos.y() / cellSize) * cellSize);
+
+    /*qDebug() << "Mouse:" << mousePos.x() << mousePos.y();
+    qDebug() << "World:" << mouseWorldPos.x() << mouseWorldPos.y();
+    qDebug() << "Grid:" << mouseGridPos.x() << mouseGridPos.y();*/
+
+    QPointF corrected(mouseGridPos.x() - cellSize/2, mouseGridPos.y() - cellSize/2);
+
+    glVertex2f(corrected.x(), corrected.y());
+    glVertex2f(corrected.x() + cellSize, corrected.y());
+    glVertex2f(corrected.x() + cellSize, corrected.y() + cellSize);
+    glVertex2f(corrected.x(), corrected.y() + cellSize);
+
+    glEnd();
+}
+
+void OpenGLScene::mouseMoveEvent(QMouseEvent *event) {
+    mousePos = event->pos();
+    update();
+}
+
 

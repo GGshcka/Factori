@@ -21,6 +21,8 @@ private:
     float lerp(float a, float b, float t) const;
     float grad(int hash, float x, float y) const;
     void generatePermutation(unsigned int seed);
+
+    QImage atlas = QImage(":/map/atlas");
 };
 
 

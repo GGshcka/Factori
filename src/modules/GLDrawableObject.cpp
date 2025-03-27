@@ -64,8 +64,12 @@ QOpenGLTexture* GLDrawableObject::getTextureFromBuffer(int id) {
 }
 
 void GLDrawableObject::draw() {
-    if (!texture || !QOpenGLContext::currentContext()) {
-        qDebug() << "Ошибка: текстура не загружена или нет OpenGL-контекста!";
+    if (!texture) {
+        qDebug() << "ERROR: GLObj: текстура не загружена!";
+        return;
+    }
+    if (!QOpenGLContext::currentContext()) {
+        qDebug() << "ERROR: GLObj: нет OpenGL-контекста!";
         return;
     }
 
@@ -86,5 +90,6 @@ void GLDrawableObject::draw() {
     glEnd();
 
     glPopMatrix();
+
     texture->release();
 }

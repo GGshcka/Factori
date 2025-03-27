@@ -14,7 +14,11 @@ public:
     MainWindow(QWidget *parent = nullptr) : QMainWindow(parent) {
         setWindowTitle("Factori");
 
+        mainView = new GLMDI();
+
         QMenuBar *menuBar = this->menuBar();
+
+        setCentralWidget(mainView);
 
         systemMenuItem = menuBar->addMenu("System");
 
@@ -30,9 +34,26 @@ public:
 
         menuBar->addMenu(systemMenuItem);
 
-        mainView = new GLMDI();
+        gameMenuItem = menuBar->addMenu("Game");
 
-        setCentralWidget(mainView);
+        auto *editorMenuAction = new QAction("Editor", this);
+        connect(settingsMenuAction, &QAction::triggered, this, [this]() {
+            mainView->codeEditor->show();
+        });
+        gameMenuItem->addAction(editorMenuAction);
+
+        buildMenuAction = new QAction("Build", this); //!TODO! Починить проблему с чекбоксом и подокнами
+        buildMenuAction->setCheckable(true);
+        buildMenuAction->setChecked(false);
+        connect(buildMenuAction, &QAction::triggered, this, [this]() {
+            if (buildMenuAction->isChecked()) {
+                OpenGLScene::editMode = buildMenuAction->isChecked();
+                mainView->execBuildSelector();
+            } else mainView->buildSelector->close();
+        });
+        gameMenuItem->addAction(buildMenuAction);
+
+        menuBar->addMenu(gameMenuItem);
 
         QFile sfile(":/style");
         if(!sfile.open(QIODevice::ReadOnly))
@@ -63,10 +84,9 @@ protected:
 
 private:
     QMdiArea *mdiArea;
-    QMdiSubWindow *test;
-    QMenu *systemMenuItem, *moodMenuItem;
-    QGraphicsView *graphicsView;
+    QMenu *systemMenuItem, *moodMenuItem, *gameMenuItem;
     GLMDI *mainView;
+    QAction *buildMenuAction;
 };
 
 

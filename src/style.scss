@@ -52,6 +52,10 @@ QTreeView, QMenuBar{
   color: lightgray;
 }
 
+QMenuBar#ActionWindowMainBar {
+  background-color: transparent;
+}
+
 QMenu {
   background-color: rgb(87, 70, 123);
   border: 1px solid rgb(174, 149, 229);
@@ -77,4 +81,8 @@ QScrollBar::handle, QScrollBar::add-line, QScrollBar::sub-line{
   background: rgb(87, 70, 123);
   border: 1px solid rgb(174, 149, 229);
   color: lightgray;
+}
+
+QWidget#ActionWindowSubContainerWidget {
+  background-color: rgba(0,0,0,0.3);
 }

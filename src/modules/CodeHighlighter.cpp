@@ -32,6 +32,9 @@ CodeHighlighter::CodeHighlighter(QTextDocument *parent)
     commentFormat.setForeground(Qt::gray);
     rules.append({QRegularExpression("#[^\n]*"), commentFormat});
 
+    commentFormat.setForeground(QBrush(qRgb(91, 91, 252)));
+    rules.append({QRegularExpression("#?[^\n]*"), commentFormat});
+
     commentFormat.setForeground(QBrush(qRgb(252, 91, 91)));
     rules.append({QRegularExpression("#![^\n]*"), commentFormat});
 }

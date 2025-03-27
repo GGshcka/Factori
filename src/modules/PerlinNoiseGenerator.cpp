@@ -52,28 +52,31 @@ float PerlinNoiseGenerator::noise(float x, float y) const {
 
 QOpenGLTexture* PerlinNoiseGenerator::generateTexture() {
     QImage image(width * 32, height * 32, QImage::Format_RGBA8888);
-    QImage textureGrass(":/map/grass");
-    QImage textureSand(":/map/sand");
-    QImage textureWater(":/map/water");
-
     QPainter painter(&image);
-
+    QVector2D atlasCursor;
+    QRandomGenerator generator;
     for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
-            float value = noise(x * 0.01f, y * 0.01f) * 0.75f + 0.75f;
-            QImage* curTexture;
+            generator.seed(chunkX*chunkY+x+y);
+            double genVal = generator.generateDouble();
 
-            if (value < 0.2f) {
-                curTexture = &textureWater;
-            } else if (value < 0.3f) {
-                curTexture = &textureSand;
+            float value = noise(x * 0.01f, y * 0.01f) * 0.75f + 0.75f;
+            if (value < 0.4f) {
+                atlasCursor = {32 * 2, 32};
+            } else if (value < 0.5f) {
+                if (genVal < 0.8) atlasCursor = {32, 32};
+                else atlasCursor = {32, 0};
+            } else if (value > 0.95f) {
+                if (genVal < 0.8) atlasCursor = {32 * 3, 32};
+                else atlasCursor = {32 * 3, 0};
             } else {
-                curTexture = &textureGrass;
+                if (genVal < 0.8) atlasCursor = {0, 32};
+                else atlasCursor = {0, 0};
             }
 
-            QRect sourceRect(0, 0, 32, 32);  // Берём верхний левый кусок текстуры (можно сделать рандомный)
+            QRect sourceRect((int)atlasCursor.x(), (int)atlasCursor.y(), 32, 32);
             QRect targetRect(x * 32, y * 32, 32, 32);
-            painter.drawImage(targetRect, curTexture->mirrored(), sourceRect);
+            painter.drawImage(targetRect, atlas.mirrored(), sourceRect);
         }
     }
 
